@@ -64,7 +64,11 @@ z_dim = 64
 
 
 # Load Train Dataset
-train_dataset = np.load('mini-imagenet-train.npy')
+train_dataset = []
+for i in range(8):
+    train_dataset.append(np.load('demo/mini-imagenet-train_{}.npy'.format(i)))
+train_dataset = np.concatenate(train_dataset)
+
 n_classes = train_dataset.shape[0]
 print(train_dataset.shape)
 
@@ -124,7 +128,7 @@ for ep in range(n_epochs):
 
 
 # Load Test Dataset
-test_dataset = np.load('mini-imagenet-test.npy')
+test_dataset = np.concatenate([np.load('demo/mini-imagenet-test_0.npy'), np.load('demo/mini_imagenet-test_1.npy')])
 n_test_classes = test_dataset.shape[0]
 print(test_dataset.shape)
 

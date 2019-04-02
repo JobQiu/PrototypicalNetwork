@@ -38,8 +38,7 @@ class OmniglotConfig(Config):
 
 class MiniImageNetConfig(Config):
     dataset = 'miniImageNet'
-
-    image_width = 28
-    image_height = 28
-    image_channel_size = 1
+    image_width = 84
+    image_height = 84
+    image_channel_size = 3
     pass
