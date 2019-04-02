@@ -48,12 +48,15 @@ extra_train = np.random.choice(synsets, 100)
 extra_test = np.random.choice(synsets, 50)
 extra_train2 = np.random.choice(synsets, 100)
 extra_train3 = np.random.choice(synsets, 100)
+extra_train4 = np.random.choice(synsets, 100)
 
 extra_train = [x for x in extra_train if x not in exist]
 extra_test = [x for x in extra_test if x not in exist and x not in extra_train]
 extra_train2 = [x for x in extra_train2 if x not in exist and x not in extra_train and x not in extra_test]
 extra_train3 = [x for x in extra_train3 if
                 x not in exist and x not in extra_train and x not in extra_test and x not in extra_train2]
+extra_train4 = [x for x in extra_train4 if
+                x not in exist and x not in extra_train and x not in extra_test and x not in extra_train2 and x not in extra_train3]
 
 print("\" \"".join(train_list + extra_train))
 print(" ".join(test_list + extra_test))
@@ -61,7 +64,7 @@ print(" ".join(test_list + extra_test))
 print(" ".join(extra_train))
 
 extra_train_str = ""
-for e in extra_train3:
+for e in extra_train4:
     extra_train_str += "\"" + e + "\"" + " "
 print(extra_train_str)
 """
