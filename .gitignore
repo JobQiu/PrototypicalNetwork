@@ -109,3 +109,6 @@ experiments/
 
 
 data/*/data/*
+
+mini-imagenet-train.npy
+mini-imagenet-test.npy
