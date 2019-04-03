@@ -3,8 +3,8 @@ import os
 
 from configs.config import MiniImageNetConfig
 from data_loader.data_generator import DataGenerator, CompressedImageNetDataGenerator
-from models.example_model import ExampleModel, PrototypicalNetwork
-from trainers.example_trainer import ExampleTrainer, ProtoNetTrainer
+from models.example_model import ExampleModel, PrototypicalNetwork, PrototypicalNetwork2
+from trainers.example_trainer import ExampleTrainer, ProtoNetTrainer, ProtoNetTrainer2
 from utils.config import process_config
 from utils.dirs import create_dirs
 from utils.logger import Logger
@@ -50,11 +50,11 @@ def run_proto_net():
 
     # create your data generator
     data = CompressedImageNetDataGenerator(config)
-    model = PrototypicalNetwork(config)
+    model = PrototypicalNetwork2(config)
 
     sess = tf.Session()
     logger = Logger(sess, config)
-    trainer = ProtoNetTrainer(sess, model, data, config, logger)
+    trainer = ProtoNetTrainer2(sess, model, data, config, logger)
     model.load(sess)
     trainer.train()
 
