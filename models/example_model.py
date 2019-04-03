@@ -7,8 +7,8 @@ class PrototypicalNetwork(BaseModel):
 
     def __init__(self, config):
         super(PrototypicalNetwork, self).__init__(config)
-        self.config = config
         self.build_model()
+        self.init_saver()
         pass
 
     def build_model(self, backbone='base', num_core=1):
