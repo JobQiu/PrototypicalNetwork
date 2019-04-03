@@ -84,7 +84,7 @@ def generate_image_embedding():
 
 if __name__ == '__main__':
 
-    experiment = 'protoNet_embedding'
+    experiment = 'protoNet'
 
     if experiment == 'protoNet':
         run_proto_net()

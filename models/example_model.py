@@ -84,8 +84,7 @@ class PrototypicalNetwork(BaseModel):
             net = conv_block(inputs, num_hidden_channel, layer=1)
             net = conv_block(net, num_hidden_channel, layer=2)
             net = conv_block(net, num_hidden_channel, layer=3)
-            net = conv_block(net, num_hidden_channel, layer=4)
-            net = conv_block(net, num_output_channel, layer=5)
+            net = conv_block(net, num_output_channel, layer=4)
             net = tf.contrib.layers.flatten(net)
             return net
 
