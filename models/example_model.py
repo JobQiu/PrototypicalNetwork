@@ -53,6 +53,11 @@ class PrototypicalNetwork(BaseModel):
             tf.reshape(tf.reduce_sum(tf.multiply(self.labels_one_hot, log_p_y), axis=-1), [-1]))
         self.acc = tf.reduce_mean(tf.to_float(tf.equal(tf.argmax(log_p_y, axis=-1), self.labels)))
 
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            self.train_step = tf.train.AdamOptimizer(self.config.learning_rate).minimize(self.loss,
+                                                                                         global_step=self.global_step_tensor)
+
     def _build_base_encoder(self, inputs, num_hidden_channel, num_output_channel, reuse=False):
         """ encode the input images
         :param inputs: [number_class, num_smaple_per_class, width, height, num_channels]
@@ -65,7 +70,7 @@ class PrototypicalNetwork(BaseModel):
                        out_channels,
                        layer=1,
                        filter_size=3):
-            with tf.variable_scope(name_or_scope="conv%d" % layer, reuse=reuse):
+            with tf.variable_scope(name_or_scope="conv%d" % layer):
                 conv = tf.layers.conv2d(inputs, out_channels, kernel_size=filter_size, padding='SAME')
                 conv = tf.contrib.layers.batch_norm(conv, updates_collections=None, decay=.99, scale=True, center=True)
                 conv = tf.nn.relu(conv)

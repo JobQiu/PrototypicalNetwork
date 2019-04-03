@@ -9,9 +9,6 @@ class ProtoNetTrainer(BaseTrain):
     def __init__(self, sess, model, data, config, logger):
         super(ProtoNetTrainer, self).__init__(sess, model, data, config, logger)
 
-        if config.optim_method == 'Adam':
-            self.train_op = tf.train.AdamOptimizer().minimize(model.loss)
-
     def train_epoch(self):
         loop = tqdm(range(self.config.num_episode_per_epoch))
         losses = []
@@ -36,7 +33,7 @@ class ProtoNetTrainer(BaseTrain):
         feed_dict = {self.model.inputs: inputs,
                      self.model.query: query,
                      self.model.labels: labels}
-        _, loss, acc = self.sess.run([self.train_op, self.model.loss, self.model.acc],
+        _, loss, acc = self.sess.run([self.model.train_step, self.model.loss, self.model.acc],
                                      feed_dict=feed_dict)
         return loss, acc
 

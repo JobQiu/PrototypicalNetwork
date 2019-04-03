@@ -48,10 +48,11 @@ def run_proto_net():
     config = MiniImageNetConfig()
     create_dirs([config.summary_dir, config.checkpoint_dir])
 
-    sess = tf.Session()
     # create your data generator
     data = CompressedImageNetDataGenerator(config)
     model = PrototypicalNetwork(config)
+
+    sess = tf.Session()
     logger = Logger(sess, config)
     trainer = ProtoNetTrainer(sess, model, data, config, logger)
     model.load(sess)
