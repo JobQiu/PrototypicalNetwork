@@ -33,10 +33,12 @@ class PrototypicalNetwork(BaseModel):
             embedded_x = self._build_base_encoder(
                 tf.reshape(self.inputs, shape=[num_class * num_sample_per_class, height, width, num_channel]),
                 config.hidden_channel_size, config.output_channel_size)
+            self.embedded_x = embedded_x
             embedded_q = self._build_base_encoder(
                 tf.reshape(self.query, shape=[num_class * num_query_per_class, height, width, num_channel]),
                 config.hidden_channel_size, config.output_channel_size,
                 reuse=True)
+            self.embedded_q = embedded_q
             embedding_size = tf.shape(embedded_x)[-1]
         else:
             raise NotImplementedError
@@ -44,6 +46,7 @@ class PrototypicalNetwork(BaseModel):
         if num_core == 1:
             prototype = tf.reshape(tensor=embedded_x, shape=[num_class, num_sample_per_class, embedding_size])
             prototype = tf.reduce_mean(prototype, axis=1)  # the average of all embedding of this class
+            self.prototype = prototype
         else:
             raise NotImplementedError
 
@@ -88,10 +91,6 @@ class PrototypicalNetwork(BaseModel):
 
     def _build_encoder_with_backbone(self):
         pass
-
-    def init_saver(self):
-        # here you initialize the tensorflow saver that will be used in saving the checkpoints.
-        self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
 
 
 class ExampleModel(BaseModel):

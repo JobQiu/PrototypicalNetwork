@@ -36,9 +36,8 @@ class BaseModel:
             self.global_step_tensor = tf.Variable(0, trainable=False, name='global_step')
 
     def init_saver(self):
-        # just copy the following line in your child class
-        # self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
-        raise NotImplementedError
+        # here you initialize the tensorflow saver that will be used in saving the checkpoints.
+        self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
 
     def build_model(self):
         raise NotImplementedError
