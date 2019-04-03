@@ -1,5 +1,11 @@
+import os
+
+
 class Config():
     split = 'vinyals'  # in matching net
+
+    exp_name = 'lala'
+
     num_class_per_episode = 60  # number of classes per episode
     num_sample_per_class = 5  # number of samples per class
     num_query_per_class = 5
@@ -14,7 +20,8 @@ class Config():
     hidden_channel_size = 64
     output_channel_size = 64  # the image will be encode as a 64-long vector
 
-    num_epoch = 10000
+    num_epochs = 10000
+    num_epoch = num_epochs
     optim_method = 'Adam'
     learning_rate = .001
 
@@ -24,6 +31,17 @@ class Config():
 
     fields = 'loss,acc'
     exp_dir = 'experiments'
+
+    mode = 'train'
+    max_to_keep = 5
+
+    @property
+    def summary_dir(self):
+        return os.path.join("experiments", self.exp_name, "summary/")
+
+    @property
+    def checkpoint_dir(self):
+        return os.path.join("experiments", self.exp_name, "checkpoint/")
 
     pass
 
@@ -38,6 +56,7 @@ class OmniglotConfig(Config):
 
 class MiniImageNetConfig(Config):
     dataset = 'miniImageNet'
+    exp_name = 'proto_net_1'
     image_width = 84
     image_height = 84
     image_channel_size = 3

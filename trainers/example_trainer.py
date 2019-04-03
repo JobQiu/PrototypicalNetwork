@@ -1,11 +1,49 @@
 from base.base_train import BaseTrain
 from tqdm import tqdm
 import numpy as np
+import tensorflow as tf
+
+
+class ProtoNetTrainer(BaseTrain):
+
+    def __init__(self, sess, model, data, config, logger):
+        super(ProtoNetTrainer, self).__init__(sess, model, data, config, logger)
+
+        if config.optim_method == 'Adam':
+            self.train_op = tf.train.AdamOptimizer().minimize(model.loss)
+
+    def train_epoch(self):
+        loop = tqdm(range(self.config.num_episode_per_epoch))
+        losses = []
+        accs = []
+        for _ in loop:
+            loss, acc = self.train_step()
+            losses.append(loss)
+            accs.append(acc)
+        loss = np.mean(losses)
+        acc = np.mean(accs)
+
+        cur_it = self.model.global_step_tensor.eval(self.sess)
+        summaries_dict = {
+            'loss': loss,
+            'acc': acc,
+        }
+        self.logger.summarize(cur_it, summaries_dict=summaries_dict)
+        self.model.save(self.sess)
+
+    def train_step(self):
+        inputs, query, labels = next(self.data.next_batch())
+        feed_dict = {self.model.inputs: inputs,
+                     self.model.query: query,
+                     self.model.labels: labels}
+        _, loss, acc = self.sess.run([self.train_op, self.model.loss, self.model.acc],
+                                     feed_dict=feed_dict)
+        return loss, acc
 
 
 class ExampleTrainer(BaseTrain):
-    def __init__(self, sess, model, data, config,logger):
-        super(ExampleTrainer, self).__init__(sess, model, data, config,logger)
+    def __init__(self, sess, model, data, config, logger):
+        super(ExampleTrainer, self).__init__(sess, model, data, config, logger)
 
     def train_epoch(self):
         loop = tqdm(range(self.config.num_iter_per_epoch))

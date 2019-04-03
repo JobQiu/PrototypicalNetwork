@@ -1,9 +1,10 @@
 import tensorflow as tf
 import os
 
-from data_loader.data_generator import DataGenerator
-from models.example_model import ExampleModel
-from trainers.example_trainer import ExampleTrainer
+from configs.config import MiniImageNetConfig
+from data_loader.data_generator import DataGenerator, CompressedImageNetDataGenerator
+from models.example_model import ExampleModel, PrototypicalNetwork
+from trainers.example_trainer import ExampleTrainer, ProtoNetTrainer
 from utils.config import process_config
 from utils.dirs import create_dirs
 from utils.logger import Logger
@@ -43,5 +44,27 @@ def main():
     trainer.train()
 
 
+def run_proto_net():
+    config = MiniImageNetConfig()
+    create_dirs([config.summary_dir, config.checkpoint_dir])
+
+    sess = tf.Session()
+    # create your data generator
+    data = CompressedImageNetDataGenerator(config)
+    model = PrototypicalNetwork(config)
+    logger = Logger(sess, config)
+    trainer = ProtoNetTrainer(sess, model, data, config, logger)
+    model.load(sess)
+    trainer.train()
+
+    pass
+
+
 if __name__ == '__main__':
-    main()
+
+    experiment = 'protoNet'
+
+    if experiment == 'protoNet':
+        run_proto_net()
+    else:
+        main()
