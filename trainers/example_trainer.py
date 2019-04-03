@@ -11,7 +11,7 @@ class ProtoNetTrainer(BaseTrain):
         self.verbose = verbose
 
     def train_epoch(self):
-        loop = tqdm(range(self.config.num_episode_per_epoch))
+        loop = range(self.config.num_episode_per_epoch)
         losses = []
         accs = []
         for _ in loop:
