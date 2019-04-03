@@ -8,7 +8,7 @@ from trainers.example_trainer import ExampleTrainer, ProtoNetTrainer
 from utils.config import process_config
 from utils.dirs import create_dirs
 from utils.logger import Logger
-from utils.utils import get_args
+from utils.utils import get_args, send_msg
 
 
 def main():
@@ -68,3 +68,5 @@ if __name__ == '__main__':
         run_proto_net()
     else:
         main()
+
+    send_msg("train done")
