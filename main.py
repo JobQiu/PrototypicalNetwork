@@ -61,12 +61,35 @@ def run_proto_net():
     pass
 
 
+def generate_image_embedding():
+    config = MiniImageNetConfig()
+    create_dirs([config.summary_dir, config.checkpoint_dir])
+
+    data = CompressedImageNetDataGenerator(config)
+    model = PrototypicalNetwork(config)
+    sess = tf.InteractiveSession()
+    sess.run(tf.global_variables_initializer())
+    model.load(sess)
+
+    train_inputs, train_query, train_labels = next(data.next_batch())
+    x_embedding, q_embedding, prototype = sess.run(fetches=[model.embedded_x, model.embedded_q, model.prototype],
+                                                   feed_dict={model.inputs: train_inputs,
+                                                              model.query: train_query,
+                                                              model.labels: train_labels})
+
+    print("")
+
+    pass
+
+
 if __name__ == '__main__':
 
-    experiment = 'protoNet'
+    experiment = 'protoNet_embedding'
 
     if experiment == 'protoNet':
         run_proto_net()
+    elif experiment == 'protoNet_embedding':
+        generate_image_embedding()
     else:
         main()
 

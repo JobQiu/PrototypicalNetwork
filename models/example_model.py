@@ -29,7 +29,7 @@ class PrototypicalNetwork(BaseModel):
         self.labels = tf.placeholder(tf.int64, [num_class, num_query_per_class])
         self.labels_one_hot = tf.one_hot(self.labels, depth=num_class)
 
-        if backbone == 'base':
+        if backbone == 'base':  # base encoder is a simple 5 layer CNN
             embedded_x = self._build_base_encoder(
                 tf.reshape(self.inputs, shape=[num_class * num_sample_per_class, height, width, num_channel]),
                 config.hidden_channel_size, config.output_channel_size)

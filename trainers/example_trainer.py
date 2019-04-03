@@ -1,13 +1,14 @@
-from base.base_train import BaseTrain
-from tqdm import tqdm
 import numpy as np
-import tensorflow as tf
+from tqdm import tqdm
+
+from base.base_train import BaseTrain
 
 
 class ProtoNetTrainer(BaseTrain):
 
-    def __init__(self, sess, model, data, config, logger):
+    def __init__(self, sess, model, data, config, logger, verbose=True):
         super(ProtoNetTrainer, self).__init__(sess, model, data, config, logger)
+        self.verbose = verbose
 
     def train_epoch(self):
         loop = tqdm(range(self.config.num_episode_per_epoch))
@@ -25,6 +26,8 @@ class ProtoNetTrainer(BaseTrain):
             'loss': loss,
             'acc': acc,
         }
+        if self.verbose:
+            print("[loss = {}, acc = {}]".format(loss, acc))
         self.logger.summarize(cur_it, summaries_dict=summaries_dict)
         self.model.save(self.sess)
 

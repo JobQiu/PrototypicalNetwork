@@ -4,7 +4,7 @@ import os
 class Config():
     split = 'vinyals'  # in matching net
 
-    exp_name = 'lala'
+    exp_name = 'default'
 
     num_class_per_episode = 60  # number of classes per episode
     num_sample_per_class = 5  # number of samples per class
@@ -21,7 +21,11 @@ class Config():
     output_channel_size = 64  # the image will be encode as a 64-long vector
 
     num_epochs = 10000
-    num_epoch = num_epochs
+
+    @property
+    def num_epoch(self):
+        return self.num_epochs
+
     optim_method = 'Adam'
     learning_rate = .001
 
@@ -60,4 +64,10 @@ class MiniImageNetConfig(Config):
     image_width = 84
     image_height = 84
     image_channel_size = 3
+
+    num_epochs = 100
+    num_episode_per_epoch = 100
+    num_class_per_episode = 20
+    num_sample_per_class = 5
+    num_query_per_class = 15
     pass
