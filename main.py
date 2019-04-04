@@ -3,8 +3,8 @@ import os
 
 from configs.config import MiniImageNetConfig
 from data_loader.data_generator import DataGenerator, CompressedImageNetDataGenerator
-from models.example_model import ExampleModel, PrototypicalNetwork, PrototypicalNetwork2
-from trainers.example_trainer import ExampleTrainer, ProtoNetTrainer, ProtoNetTrainer2
+from models.example_model import ExampleModel, PrototypicalNetwork
+from trainers.example_trainer import ExampleTrainer, ProtoNetTrainer
 from utils.config import process_config
 from utils.dirs import create_dirs
 from utils.logger import Logger
@@ -50,11 +50,11 @@ def run_proto_net():
 
     # create your data generator
     data = CompressedImageNetDataGenerator(config)
-    model = PrototypicalNetwork2(config)
+    model = PrototypicalNetwork(config)
 
     sess = tf.Session()
     logger = Logger(sess, config)
-    trainer = ProtoNetTrainer2(sess, model, data, config, logger)
+    trainer = ProtoNetTrainer(sess, model, data, config, logger)
     model.load(sess)
     trainer.train()
 
@@ -72,10 +72,23 @@ def generate_image_embedding():
     model.load(sess)
 
     train_inputs, train_query, train_labels = next(data.next_batch())
-    x_embedding, q_embedding, prototype = sess.run(fetches=[model.embedded_x, model.embedded_q, model.prototype],
-                                                   feed_dict={model.inputs: train_inputs,
-                                                              model.query: train_query,
-                                                              model.labels: train_labels})
+    x_embedding, q_embedding, prototype = sess.run(fetches=[model.emb_x, model.emb_q, model.prototype],
+                                                   feed_dict={model.x: train_inputs,
+                                                              model.q: train_query,
+                                                              model.y: train_labels})
+    import numpy as np
+
+    from sklearn.manifold import TSNE
+    all = np.concatenate([x_embedding, q_embedding, prototype])
+    tsne = TSNE(n_components=2, random_state=0)
+
+    all_res = tsne.fit_transform(all)
+    x_res, q_res, p_res = all[:len(x_embedding)], all[len(x_embedding):len(x_embedding) + len(q_embedding)], all[len(
+        x_embedding) + len(q_embedding):]
+
+    x_res = np.reshape(x_res, newshape=(20, 5, -1))
+    q_res = np.reshape(q_res, newshape=(20, 15, -1))
+
 
     print("")
 
@@ -84,6 +97,7 @@ def generate_image_embedding():
 
 if __name__ == '__main__':
 
+    tf.reset_default_graph()
     experiment = 'protoNet'
 
     if experiment == 'protoNet':
@@ -94,3 +108,106 @@ if __name__ == '__main__':
         main()
 
     send_msg("train done")
+#%%
+import tensorflow as tf
+import os
+
+from configs.config import MiniImageNetConfig
+from data_loader.data_generator import DataGenerator, CompressedImageNetDataGenerator
+from models.example_model import ExampleModel, PrototypicalNetwork
+from trainers.example_trainer import ExampleTrainer, ProtoNetTrainer
+from utils.config import process_config
+from utils.dirs import create_dirs
+from utils.logger import Logger
+from utils.utils import get_args, send_msg
+
+tf.reset_default_graph()
+    
+config = MiniImageNetConfig()
+create_dirs([config.summary_dir, config.checkpoint_dir])
+
+data = CompressedImageNetDataGenerator(config)
+model = PrototypicalNetwork(config)
+sess = tf.InteractiveSession()
+sess.run(tf.global_variables_initializer())
+model.load(sess)
+
+train_inputs, train_query, train_labels = next(data.next_batch())
+x_embedding, q_embedding, prototype = sess.run(fetches=[model.emb_x, model.emb_q, model.prototype],
+                                               feed_dict={model.x: train_inputs,
+                                                          model.q: train_query,
+                                                          model.y: train_labels})
+import numpy as np
+
+from sklearn.manifold import TSNE
+all = np.concatenate([x_embedding, q_embedding, prototype])
+tsne = TSNE(n_components=2, random_state=0)
+
+all_res = tsne.fit_transform(all)
+x_res, q_res, p_res = all[:len(x_embedding)], all[len(x_embedding):len(x_embedding) + len(q_embedding)], all[len(
+    x_embedding) + len(q_embedding):]
+
+x_res = np.reshape(x_res, newshape=(20, 5, -1))
+q_res = np.reshape(q_res, newshape=(20, 15, -1))
+
+#%%
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()
+
+colors = 'r', 'g', 'b', 'c', 'm', 'y', 'k', 'orange', 'purple'
+c = 14
+for s in range(5):
+    plt.figure()
+    plt.imshow(train_inputs[c][s])
+    plt.grid()
+
+plt.figure(figsize=(20,12))
+plt.scatter(p_res[c][0],p_res[c][1], c='r',s=400)
+
+plt.scatter(p_res[c-1][0],p_res[c-1][1],c='b',s=400)
+for s in range(5):
+    plt.scatter(x_res[c][s][0],x_res[c][s][1], c='r',alpha=0.8,s=100)
+    
+    plt.scatter(x_res[c-1][s][0],x_res[c-1][s][1],c='b', alpha=0.8,s=100)
+    plt.text(x_res[c][s][0]+.03, x_res[c][s][1]+.03, "{}".format(s), fontsize=9)
+
+#%%
+        
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Fixing random state for reproducibility
+np.random.seed(19680801)
+
+
+def randrange(n, vmin, vmax):
+    '''
+    Helper function to make an array of random numbers having shape (n, )
+    with each number distributed Uniform(vmin, vmax).
+    '''
+    return (vmax - vmin)*np.random.rand(n) + vmin
+
+fig = plt.figure(figsize=(20,12))
+
+ax = fig.add_subplot(111, projection='3d')
+
+n = 100
+
+base = 6
+for c in range(base,base+2):
+    
+    ax.scatter(p_res[c][0],p_res[c][1],p_res[c][2],marker=c,s=400)
+    for s in range(5):
+        
+        ax.scatter(x_res[c][s][0], x_res[c][s][1], x_res[c][s][2], marker=c,c=colors[c], s = 100)
+        #plt.scatter(x_res[c][s][0],x_res[c][s][1], c=colors[c], alpha=0.8, marker=c,s=100)
+
+
+ax.set_xlabel('X Label')
+ax.set_ylabel('Y Label')
+ax.set_zlabel('Z Label')
+
+plt.show()

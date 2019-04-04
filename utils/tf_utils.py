@@ -19,19 +19,6 @@ def euclidean_distance(a, b):
     :return:
     return the e distance between every row and every row in b
     """
-
-    N, D = a.get_shape().as_list()
-    M = b.get_shape().as_list()[0]
-
-    a = tf.tile(tf.expand_dims(a, axis=1), (1, M, 1))
-    b = tf.tile(tf.expand_dims(b, axis=0), (N, 1, 1))
-
-    return tf.reduce_mean(tf.square(a - b), axis=2)
-
-
-# %%
-
-def euclidean_distance2(a, b):
     # a.shape = N x D
     # b.shape = M x D
     N, D = tf.shape(a)[0], tf.shape(a)[1]
