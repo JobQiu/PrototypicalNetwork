@@ -211,3 +211,13 @@ ax.set_ylabel('Y Label')
 ax.set_zlabel('Z Label')
 
 plt.show()
+
+#%%
+
+tf.reset_default_graph()
+sess = tf.InteractiveSession()
+x = tf.placeholder(tf.float32, shape=(5,1600))
+singular_values,u,v = tf.svd(x)
+sigma = tf.diag(singular_values)
+s1,u1,v1, sigma1 = sess.run([singular_values,u,v,sigma],feed_dict={x:x_emb[0]})
+uu, ss, vv = np.linalg.svd(x_emb[0])

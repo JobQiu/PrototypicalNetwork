@@ -31,40 +31,51 @@ class PrototypicalNetwork(BaseModel):
 
     def build_model(self):
         config = self.config
-        x = tf.placeholder(dtype=tf.float32,
-                           shape=[None, None, config.image_height, config.image_width, config.image_channel_size])
-        self.x = x
-        q = tf.placeholder(dtype=tf.float32,
-                           shape=[None, None, config.image_height, config.image_width, config.image_channel_size])
-        self.q = q
-        x_shape = tf.shape(x)
-        q_shape = tf.shape(q)
-        num_classes, num_support = x_shape[0], x_shape[1]
-        num_queries = q_shape[1]
-        y = tf.placeholder(tf.int64, [None, None])
-        self.y = y
-        y_one_hot = tf.one_hot(y, depth=num_classes)
-        emb_in = encoder(tf.reshape(x, [num_classes * num_support, config.image_height, config.image_width,
-                                        config.image_channel_size]), config.hidden_channel_size,
-                         config.output_channel_size)
-        emb_dim = tf.shape(emb_in)[-1]
-        self.emb_x = emb_in
-        emb_x = tf.reduce_mean(tf.reshape(emb_in, [num_classes, num_support, emb_dim]), axis=1)
-        emb_q = encoder(tf.reshape(q, [num_classes * num_queries, config.image_height, config.image_width,
-                                       config.image_channel_size]),
-                        config.hidden_channel_size,
-                        config.output_channel_size,
-                        reuse=True)
-        self.emb_q = emb_q
-        self.prototype = emb_x
-        dists = euclidean_distance(emb_q, emb_x)
-        log_p_y = tf.reshape(tf.nn.log_softmax(-dists), [num_classes, num_queries, -1])
+
+        num_class = config.num_class_per_episode
+        num_support = config.num_sample_per_class
+        num_query = config.num_query_per_class
+
+        self.x = tf.placeholder(dtype=tf.float32,
+                                shape=[num_class, num_support, config.image_height, config.image_width,
+                                       config.image_channel_size],
+                                name='support_set')
+
+        self.q = tf.placeholder(dtype=tf.float32,
+                                shape=[num_class, num_query, config.image_height, config.image_width,
+                                       config.image_channel_size],
+                                name='query')
+
+        self.y = tf.placeholder(tf.int64, [None, None], name='label_of_query')
+        y_one_hot = tf.one_hot(self.y, depth=num_class)
+        self.emb_x = encoder(tf.reshape(self.x, [num_class * num_support, config.image_height, config.image_width,
+                                                 config.image_channel_size]), config.hidden_channel_size,
+                             config.output_channel_size)
+        emb_dim = tf.shape(self.emb_x)[-1]
+        self.prototype = tf.reduce_mean(tf.reshape(self.emb_x, [num_class, num_support, emb_dim]), axis=1,
+                                        name='prototype')
+        self.emb_q = encoder(tf.reshape(self.q, [num_class * num_query, config.image_height, config.image_width,
+                                                 config.image_channel_size]),
+                             config.hidden_channel_size,
+                             config.output_channel_size,
+                             reuse=True)
+
+        dists = euclidean_distance(self.emb_q, self.prototype)
+        log_p_y = tf.reshape(tf.nn.log_softmax(-dists), [num_class, num_query, -1])
         # cross entropy loss
-        ce_loss = -tf.reduce_mean(tf.reshape(tf.reduce_sum(tf.multiply(y_one_hot, log_p_y), axis=-1), [-1]))
-        acc = tf.reduce_mean(tf.to_float(tf.equal(tf.argmax(log_p_y, axis=-1), y)))
-        self.loss = ce_loss
-        self.acc = acc
-        self.train_op = tf.train.AdamOptimizer().minimize(ce_loss)
+        self.loss = -tf.reduce_mean(
+            tf.reshape(
+                tf.reduce_sum(tf.multiply(y_one_hot, log_p_y), axis=-1),
+                [-1]
+            ),
+            name='loss'
+        )
+
+        self.acc = tf.reduce_mean(tf.cast(x=tf.equal(tf.argmax(log_p_y, axis=-1), self.y),
+                                          dtype=tf.float32
+                                          ), name='accuracy'
+                                  )
+        self.train_op = tf.train.AdamOptimizer().minimize(self.loss)
 
 
 class ExampleModel(BaseModel):

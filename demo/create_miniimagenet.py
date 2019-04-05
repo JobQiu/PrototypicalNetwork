@@ -6,10 +6,12 @@ import cv2
 
 n_train_classes = 64
 n_test_classes = 20
+n_val_classes = 16
 n_examples, width, height, channels = 350, 84, 84, 3
 
 root_path = './data/mini-imagenet/data'
 train_path = os.path.join(root_path, 'train')
+val_path = os.path.join(root_path, 'val')
 test_path = os.path.join(root_path, 'test')
 
 train_dirs = [f for f in glob.glob(os.path.join(train_path, '*')) if os.path.isdir(f)]

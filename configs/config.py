@@ -39,6 +39,8 @@ class Config():
     mode = 'train'
     max_to_keep = 5
 
+    image_augmentation = True
+
     @property
     def summary_dir(self):
         return os.path.join("experiments", self.exp_name, "summary/")
