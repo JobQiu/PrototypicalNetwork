@@ -40,7 +40,8 @@ def embedding2weights(x, num_class=20, num_support=5):
         x_all = tf.concat(para_list, 1)
         x_all = tf.transpose(x_all, perm=[0, 2, 1])
 
-        weight = tf.get_variable(shape=(len(para_list), 1), name='weight', dtype=tf.float32)
+        weight = tf.get_variable(shape=(len(para_list), 1), name='weight', dtype=tf.float32,
+                                 initializer=tf.random_uniform_initializer(minval=-0.1, maxval=0.1))
         _W_t = tf.tile(tf.expand_dims(weight, axis=0), [num_class, 1, 1])
 
         out = tf.matmul(x_all, _W_t)
