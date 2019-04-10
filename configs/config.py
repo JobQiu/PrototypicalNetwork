@@ -62,7 +62,7 @@ class OmniglotConfig(Config):
 
 class MiniImageNetConfig(Config):
     dataset = 'miniImageNet'
-    exp_name = 'proto_net_1'
+    exp_name = 'proto_net_2'
     image_width = 84
     image_height = 84
     image_channel_size = 3

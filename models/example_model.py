@@ -1,6 +1,6 @@
 from base.base_model import BaseModel
 import tensorflow as tf
-from utils.tf_utils import euclidean_distance
+from utils.tf_utils import euclidean_distance, euclidean_distance_with_weight
 
 
 def conv_block(inputs, out_channels, name='conv'):
@@ -20,6 +20,33 @@ def encoder(x, h_dim, z_dim, reuse=False):
         net = conv_block(net, z_dim, name='conv_4')
         net = tf.contrib.layers.flatten(net)
         return net
+
+
+def embedding2weights(x, num_class=20, num_support=5):
+    if len(x.get_shape()) == 2:
+        x = tf.reshape(x, [num_class, num_support, -1])
+
+    with tf.variable_scope(name_or_scope="get_weight", reuse=tf.AUTO_REUSE):
+        x_max = tf.expand_dims(tf.reduce_max(x, 1), 1)
+        x_min = tf.expand_dims(tf.reduce_min(x, 1), 1)
+        x_sum = tf.expand_dims(tf.reduce_sum(x, 1), 1)
+        x_prod = tf.expand_dims(tf.reduce_prod(x, 1), 1)
+        x_mean, x_variance = tf.nn.moments(x, [1])
+        x_mean = tf.expand_dims(x_mean, 1)
+        x_variance = tf.expand_dims(x_variance, 1)
+
+        para_list = [x_max, x_min, x_mean, x_prod, x_sum, x_variance]
+
+        x_all = tf.concat(para_list, 1)
+        x_all = tf.transpose(x_all, perm=[0, 2, 1])
+
+        weight = tf.get_variable(shape=(len(para_list), 1), name='weight', dtype=tf.float32)
+        _W_t = tf.tile(tf.expand_dims(weight, axis=0), [num_class, 1, 1])
+
+        out = tf.matmul(x_all, _W_t)
+        out = tf.squeeze(out, axis=2)
+        out = tf.nn.softmax(out, axis=1)
+        return out
 
 
 class PrototypicalNetwork(BaseModel):
@@ -51,6 +78,8 @@ class PrototypicalNetwork(BaseModel):
         self.emb_x = encoder(tf.reshape(self.x, [num_class * num_support, config.image_height, config.image_width,
                                                  config.image_channel_size]), config.hidden_channel_size,
                              config.output_channel_size)
+        weights = embedding2weights(self.emb_x, num_class, num_support)
+
         emb_dim = tf.shape(self.emb_x)[-1]
         self.prototype = tf.reduce_mean(tf.reshape(self.emb_x, [num_class, num_support, emb_dim]), axis=1,
                                         name='prototype')
@@ -60,7 +89,8 @@ class PrototypicalNetwork(BaseModel):
                              config.output_channel_size,
                              reuse=True)
 
-        dists = euclidean_distance(self.emb_q, self.prototype)
+        # dists = euclidean_distance(self.emb_q, self.prototype)
+        dists = euclidean_distance_with_weight(self.emb_q, self.prototype, weights)
         log_p_y = tf.reshape(tf.nn.log_softmax(-dists), [num_class, num_query, -1])
         # cross entropy loss
         self.loss = -tf.reduce_mean(

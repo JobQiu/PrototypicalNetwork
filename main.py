@@ -89,7 +89,6 @@ def generate_image_embedding():
     x_res = np.reshape(x_res, newshape=(20, 5, -1))
     q_res = np.reshape(q_res, newshape=(20, 15, -1))
 
-
     print("")
 
     pass
@@ -98,9 +97,9 @@ def generate_image_embedding():
 if __name__ == '__main__':
 
     tf.reset_default_graph()
-    experiment = 'protoNet'
+    experiment = 'protoNet2'
 
-    if experiment == 'protoNet':
+    if experiment == 'protoNet2':
         run_proto_net()
     elif experiment == 'protoNet_embedding':
         generate_image_embedding()
@@ -108,6 +107,7 @@ if __name__ == '__main__':
         main()
 
     send_msg("train done")
+    """
 #%%
 import tensorflow as tf
 import os
@@ -221,3 +221,5 @@ singular_values,u,v = tf.svd(x)
 sigma = tf.diag(singular_values)
 s1,u1,v1, sigma1 = sess.run([singular_values,u,v,sigma],feed_dict={x:x_emb[0]})
 uu, ss, vv = np.linalg.svd(x_emb[0])
+    
+    """
