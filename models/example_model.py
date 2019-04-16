@@ -111,7 +111,7 @@ class PrototypicalNetwork(BaseModel):
                                           dtype=tf.float32
                                           ), name='accuracy'
                                   )
-        self.train_op = tf.train.AdamOptimizer().minimize(self.loss)
+        self.train_op = tf.train.AdamOptimizer().minimize(self.loss, global_step=self.global_step_tensor)
 
 
 class ExampleModel(BaseModel):
