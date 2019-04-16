@@ -72,4 +72,7 @@ class MiniImageNetConfig(Config):
     num_class_per_episode = 20
     num_sample_per_class = 5
     num_query_per_class = 15
+
+    embedding_size = 1600
+    learning_rate = .0001
     pass
