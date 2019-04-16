@@ -1,8 +1,9 @@
 import numpy as np
+from configs.config import MiniImageNetConfig
 
 
 class DataGenerator:
-    def __init__(self, config):
+    def __init__(self, config=MiniImageNetConfig()):
         self.config = config
         # load data here
         self.input = np.ones((500, 784))
@@ -19,10 +20,11 @@ class CompressedImageNetDataGenerator:
         self.config = config
         self.train_images = np.concatenate([np.load('demo/mini-imagenet-train_{}.npy'.format(i)) for i in range(8)])
         self.test_images = np.concatenate([np.load('demo/mini-imagenet-test_{}.npy'.format(i)) for i in range(2)])
+        self.val_images = np.concatenate([np.load('demo/mini-imagenet-val_{}.npy'.format(i)) for i in range(2)])
 
-    def next_batch(self):
+    def next_batch(self, mode='train'):
         config = self.config
-        if config.mode == 'train':
+        if mode == 'train':
 
             total_num_class = len(self.train_images)
             total_num_sample_per_class = self.train_images.shape[1]

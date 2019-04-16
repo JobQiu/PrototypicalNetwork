@@ -67,7 +67,7 @@ class MiniImageNetConfig(Config):
     image_height = 84
     image_channel_size = 3
 
-    num_epochs = 100
+    num_epochs = 300
     num_episode_per_epoch = 100
     num_class_per_episode = 20
     num_sample_per_class = 5

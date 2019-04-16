@@ -22,7 +22,7 @@ def encoder(x, h_dim, z_dim, reuse=False):
         return net
 
 
-def embedding2weights(x, num_class=20, num_support=5):
+def embedding2weights(x, num_class=20, num_support=5, embedding_size=1600):
     if len(x.get_shape()) == 2:
         x = tf.reshape(x, [num_class, num_support, -1])
 
@@ -47,7 +47,7 @@ def embedding2weights(x, num_class=20, num_support=5):
         out = tf.matmul(x_all, _W_t)
         out = tf.squeeze(out, axis=2)
         out = tf.nn.softmax(out, axis=1)
-        out = tf.scalar_mul(1600, out)
+        out = tf.scalar_mul(embedding_size, out)
         return out
 
 
@@ -80,7 +80,7 @@ class PrototypicalNetwork(BaseModel):
         self.emb_x = encoder(tf.reshape(self.x, [num_class * num_support, config.image_height, config.image_width,
                                                  config.image_channel_size]), config.hidden_channel_size,
                              config.output_channel_size)
-        weights = embedding2weights(self.emb_x, num_class, num_support)
+        weights = embedding2weights(self.emb_x, num_class, num_support, embedding_size=config.embedding_size)
 
         emb_dim = tf.shape(self.emb_x)[-1]
         self.prototype = tf.reduce_mean(tf.reshape(self.emb_x, [num_class, num_support, emb_dim]), axis=1,
