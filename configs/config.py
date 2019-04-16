@@ -69,7 +69,7 @@ class MiniImageNetConfig(Config):
 
     num_epochs = 300
     num_episode_per_epoch = 100
-    num_class_per_episode = 20
+    num_class_per_episode = 5
     num_sample_per_class = 5
     num_query_per_class = 15
 
