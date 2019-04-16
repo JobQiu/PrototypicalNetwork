@@ -47,6 +47,7 @@ def embedding2weights(x, num_class=20, num_support=5):
         out = tf.matmul(x_all, _W_t)
         out = tf.squeeze(out, axis=2)
         out = tf.nn.softmax(out, axis=1)
+        out = tf.scalar_mul(1600, out)
         return out
 
 
