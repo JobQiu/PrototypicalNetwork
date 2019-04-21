@@ -50,7 +50,10 @@ class Config():
     def checkpoint_dir(self):
         return os.path.join("experiments", self.exp_name, "checkpoint/")
 
-    pass
+    def print_config(self):
+
+
+        pass
 
 
 class OmniglotConfig(Config):

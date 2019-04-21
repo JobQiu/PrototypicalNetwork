@@ -112,3 +112,4 @@ data/*/data/*
 
 mini-imagenet-train.npy
 mini-imagenet-test.npy
+download_imagenet_cq.sh
