@@ -54,12 +54,12 @@ def embedding2weights(x, num_class=20, num_support=5, embedding_size=1600):
 
 class PrototypicalNetwork(BaseModel):
 
-    def __init__(self, config):
+    def __init__(self, config, with_weight=True):
         super(PrototypicalNetwork, self).__init__(config)
-        self.build_model()
+        self.build_model(with_weight=with_weight)
         self.init_saver()
 
-    def build_model(self):
+    def build_model(self, with_weight):
         config = self.config
 
         num_class = config.num_class_per_episode
@@ -96,7 +96,10 @@ class PrototypicalNetwork(BaseModel):
                              reuse=True)
 
         # dists = euclidean_distance(self.emb_q, self.prototype)
-        dists = euclidean_distance_with_weight(self.emb_q, self.prototype, weights)
+        if with_weight:
+            dists = euclidean_distance_with_weight(self.emb_q, self.prototype, weights)
+        else:
+            dists = euclidean_distance(self.emb_q, self.prototype)
         log_p_y = tf.reshape(tf.nn.log_softmax(-dists), [num_class, num_query, -1])
         # cross entropy loss
         self.loss = -tf.reduce_mean(

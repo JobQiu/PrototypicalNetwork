@@ -14,7 +14,7 @@ create_dirs([config.summary_dir, config.checkpoint_dir])
 
 # create your data generator
 data = CompressedImageNetDataGenerator(config)
-model = PrototypicalNetwork(config)
+model = PrototypicalNetwork(config, with_weight=False)
 
 sess = tf.Session()
 logger = Logger(sess, config)
