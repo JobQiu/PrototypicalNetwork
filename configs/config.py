@@ -10,6 +10,7 @@ class Config():
     num_sample_per_class = 5  # number of samples per class
     num_query_per_class = 5
     num_episode_per_epoch = 100
+    num_episode_per_val_epoch = 25
 
     sequential_sampler_rather_than_episodic = False
     cuda = False
@@ -54,9 +55,7 @@ class Config():
 
 class OmniglotConfig(Config):
     dataset = 'omniglot'
-
     num_epoch = 20
-
     pass
 
 

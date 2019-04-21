@@ -57,7 +57,7 @@ class CompressedImageNetDataGenerator:
         support = np.zeros(shape=[config.num_class_per_episode, config.num_sample_per_class, config.image_height,
                                   config.image_width, config.image_channel_size], dtype=np.float32)
 
-        # if config. image augmentation, use np. flip to get the flip image to feed todo
+        # todo if config. image augmentation, use np. flip to get the flip image to feed
         # np.flip(A, axis=3)
         query = np.zeros(shape=[config.num_class_per_episode, config.num_query_per_class, config.image_height,
                                 config.image_width, config.image_channel_size], dtype=np.float32)
