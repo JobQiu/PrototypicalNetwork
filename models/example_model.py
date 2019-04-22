@@ -42,6 +42,41 @@ def embedding2weights(x, num_class=20, num_support=5, embedding_size=1600):
 
         weight = tf.get_variable(shape=(len(para_list), 1), name='weight', dtype=tf.float32,
                                  initializer=tf.random_uniform_initializer(minval=-0.1, maxval=0.1))
+
+        weight2 = tf.get_variable(shape=(1600, 6), name='weight2', dtype=tf.float32,
+                                  initializer=tf.random_uniform_initializer(minval=-0.1, maxval=0.1))
+        _W_t = tf.tile(tf.expand_dims(weight2, axis=0), [num_class, 1, 1])
+
+        # out = tf.matmul(x_all, _W_t)
+        out = tf.multiply(x_all, _W_t)
+        out = tf.reduce_sum(out, axis=2)
+        # out = tf.squeeze(out, axis=2)
+        out = tf.nn.softmax(out, axis=1)
+        out = tf.scalar_mul(1600, out)
+        # out = tf.multiply(out, embedding_size)
+        return out
+
+
+def embedding2weight_rnn(x, num_class=20, num_support=5, embedding_size=1600):
+    if len(x.get_shape()) == 2:
+        x = tf.reshape(x, [num_class, num_support, -1])
+
+    with tf.variable_scope(name_or_scope="get_weight", reuse=tf.AUTO_REUSE):
+        x_max = tf.expand_dims(tf.reduce_max(x, 1), 1)
+        x_min = tf.expand_dims(tf.reduce_min(x, 1), 1)
+        x_sum = tf.expand_dims(tf.reduce_sum(x, 1), 1)
+        x_prod = tf.expand_dims(tf.reduce_prod(x, 1), 1)
+        x_mean, x_variance = tf.nn.moments(x, [1])
+        x_mean = tf.expand_dims(x_mean, 1)
+        x_variance = tf.expand_dims(x_variance, 1)
+
+        para_list = [x_max, x_min, x_mean, x_prod, x_sum, x_variance]
+
+        x_all = tf.concat(para_list, 1)
+        x_all = tf.transpose(x_all, perm=[0, 2, 1])
+
+        weight = tf.get_variable(shape=(len(para_list), 1), name='weight', dtype=tf.float32,
+                                 initializer=tf.random_uniform_initializer(minval=-0.1, maxval=0.1))
         _W_t = tf.tile(tf.expand_dims(weight, axis=0), [num_class, 1, 1])
 
         out = tf.matmul(x_all, _W_t)
@@ -86,6 +121,7 @@ class PrototypicalNetwork(BaseModel):
 
         weights = embedding2weights(self.emb_x, num_class, num_support,
                                     embedding_size=emb_dim)  # embedding_size=config.embedding_size)
+        self.weights = weights
 
         self.prototype = tf.reduce_mean(tf.reshape(self.emb_x, [num_class, num_support, emb_dim]), axis=1,
                                         name='prototype')
@@ -142,7 +178,7 @@ class ExampleModel(BaseModel):
             self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
     def init_saver(self):
-        # here you initialize the tensorflow saver that will be used in saving the checkpoints.
+        # here you initialize the tensorflow saver that will be used in saving the checkpoint.
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
 
 

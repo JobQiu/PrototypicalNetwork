@@ -3,6 +3,8 @@ from tqdm import tqdm
 
 from base.base_train import BaseTrain
 
+np.random.seed(42)
+
 
 class ProtoNetTrainer(BaseTrain):
 
@@ -62,15 +64,29 @@ class ProtoNetTrainer(BaseTrain):
                                      feed_dict=feed_dict)
         return loss, acc
 
-    def test_stpe(self):
+    def test_step(self):
 
         inputs, query, labels = next(self.data.next_batch())
         feed_dict = {self.model.x: inputs,
                      self.model.q: query,
                      self.model.y: labels}
-        _, loss, acc = self.sess.run([self.model.train_op, self.model.loss, self.model.acc],
-                                     feed_dict=feed_dict)
+        _, loss, acc, weights = self.sess.run(
+            [self.model.train_op, self.model.loss, self.model.acc, self.model.weights],
+            feed_dict=feed_dict)
         return loss, acc
+
+    def test(self):
+
+        test_losses = []
+        test_accs = []
+
+        for _ in tqdm(range(self.config.num_episode_per_val_epoch)):
+            loss, acc = self.test_step()
+            test_losses.append(loss)
+            test_accs.append(acc)
+        test_loss = np.mean(test_losses)
+        test_acc = np.mean(test_accs)
+        return test_loss, test_acc
 
 
 class ExampleTrainer(BaseTrain):

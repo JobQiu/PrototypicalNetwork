@@ -8,18 +8,29 @@ from utils.dirs import create_dirs
 from utils.logger import Logger
 from utils.utils import send_msg
 
-config = MiniImageNetConfig()
-config.exp_name = "without_weight"
-create_dirs([config.summary_dir, config.checkpoint_dir])
+if __name__ == "__main__":
+    test = False
 
-# create your data generator
-data = CompressedImageNetDataGenerator(config)
-model = PrototypicalNetwork(config)
+    config = MiniImageNetConfig()
+    config.exp_name = "proto_net_2"
+    create_dirs([config.summary_dir, config.checkpoint_dir])
 
-sess = tf.Session()
-logger = Logger(sess, config)
-trainer = ProtoNetTrainer(sess, model, data, config, logger)
-model.load(sess)
-trainer.train()
+    # create your data generator
+    data = CompressedImageNetDataGenerator(config)
+    model = PrototypicalNetwork(config)
 
-send_msg("Done")
+    sess = tf.Session()
+    logger = Logger(sess, config)
+    trainer = ProtoNetTrainer(sess, model, data, config, logger)
+    model.load(sess)
+    if test:
+        test_loss, test_acc = trainer.test()
+        print("test result")
+        print("test_loss = {}".format(test_loss))
+        print("test_acc = {}".format(test_acc))
+
+    else:
+
+        trainer.train()
+
+        send_msg("Done")
