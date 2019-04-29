@@ -9,10 +9,11 @@ from utils.logger import Logger
 from utils.utils import send_msg
 
 if __name__ == "__main__":
-    test = False
+    test = True
 
     config = MiniImageNetConfig()
     config.exp_name = "proto_net_2"
+    config.learning_rate = .0005
     create_dirs([config.summary_dir, config.checkpoint_dir])
 
     # create your data generator
